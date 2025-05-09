@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cardápio - Padaria Vovô Otávio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f2ef;
+      color: #3e2b1a;
+      padding: 20px;
+      margin: 0;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    h2 {
+      border-bottom: 2px solid #3e2b1a;
+      padding-bottom: 5px;
+    }
+    .item {
+      margin-bottom: 10px;
+    }
+    .item label {
+      display: flex;
+      justify-content: space-between;
+    }
+    .item input[type="number"] {
+      width: 60px;
+      margin-left: 10px;
+    }
+    button {
+      background-color: #3e2b1a;
+      color: white;
+      border: none;
+      padding: 10px;
+      margin-top: 20px;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    footer {
+      margin-top: 30px;
+      font-size: 14px;
+      text-align: center;
+    }
+    #dadosCliente {
+      margin-bottom: 20px;
+    }
+    #dadosCliente input,
+    #dadosCliente select {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      font-size: 14px;
+    }
+    #deliveryFields {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Padaria Vovô Otávio</h1>
+    <p>Desde 1964</p>
+  </header>
+
+  <div id="dadosCliente">
+    <label for="nome">Seu nome:</label>
+    <input type="text" id="nome" required />
+
+    <label for="recebimento">Forma de recebimento:</label>
+    <select id="recebimento" onchange="mostrarCamposEntrega()">
+      <option value="buscar">Vou buscar</option>
+      <option value="consumir">Consumir na padaria</option>
+      <option value="levar">Vai levar</option>
+      <option value="entrega">Entrega</option>
+    </select>
+
+    <div id="deliveryFields">
+      <label for="endereco">Endereço para entrega:</label>
+      <input type="text" id="endereco" />
+    </div>
+  </div>
+
+  <form id="orderForm">
+    <section>
+      <h2>Café da Manhã</h2>
+      <div class="item"><label>Pão francês - R$ 0,60 <input type="number" min="0" value="0" data-price="0.60"></label></div>
+      <div class="item"><label>Misto quente - R$ 8,00 <input type="number" min="0" value="0" data-price="8.00"></label></div>
+      <div class="item"><label>Café coado - Grátis <input type="number" min="0" value="0" data-price="0.00"></label></div>
+      <div class="item"><label>Suco natural - R$ 10,00 <input type="number" min="0" value="0" data-price="10.00"></label></div>
+      <div class="item"><label>Tapioca recheada - R$ 12,00 <input type="number" min="0" value="0" data-price="12.00"></label></div>
+    </section>
+
+    <section>
+      <h2>Jantar</h2>
+      <div class="item"><label>Caldo de feijão - R$ 7,00 <input type="number" min="0" value="0" data-price="7.00"></label></div>
+      <div class="item"><label>Escondidinho de carne seca - R$ 18,00 <input type="number" min="0" value="0" data-price="18.00"></label></div>
+      <div class="item"><label>Lasanha - R$ 14,99 <input type="number" min="0" value="0" data-price="14.99"></label></div>
+      <div class="item"><label>Sanduíche natural - R$ 10,00 <input type="number" min="0" value="0" data-price="10.00"></label></div>
+      <div class="item"><label>Chá quente - R$ 3,00 <input type="number" min="0" value="0" data-price="3.00"></label></div>
+    </section>
+
+    <button type="button" onclick="enviarPedido()">Fazer Pedido</button>
+  </form>
+
+  <footer>
+    <p>Horário de funcionamento: 07:00 às 18:00</p>
+    <p>WhatsApp: (81) 99114-0925</p>
+  </footer>
+
+  <script>
+    let numeroComanda = 200;
+
+    function gerarComandaId() {
+      return numeroComanda++;
+    }
+
+    function mostrarCamposEntrega() {
+      const recebimento = document.getElementById('recebimento').value;
+      document.getElementById('deliveryFields').style.display = recebimento === 'entrega' ? 'block' : 'none';
+    }
+
+    function enviarPedido() {
+      const inputs = document.querySelectorAll('input[type="number"]');
+      let mensagem = "Olá, gostaria de fazer um pedido:%0A";
+      let total = 0;
+      let temPedido = false;
+
+      const comandaId = gerarComandaId();
+      mensagem += `Comanda nº ${comandaId}%0A`;
+
+      inputs.forEach(input => {
+        const qtd = parseInt(input.value);
+        const preco = parseFloat(input.dataset.price);
+        const nome = input.parentElement.textContent.trim().split(' - ')[0];
+
+        if (qtd > 0) {
+          temPedido = true;
+          const subtotal = qtd * preco;
+          total += subtotal;
+          mensagem += `- ${nome} x${qtd} = R$ ${subtotal.toFixed(2).replace('.', ',')}%0A`;
+        }
+      });
+
+      if (!temPedido) {
+        alert("Selecione pelo menos um item.");
+        return;
+      }
+
+      const nomeCliente = document.getElementById('nome').value;
+      if (!nomeCliente) {
+        alert("Por favor, informe seu nome.");
+        return;
+      }
+
+      mensagem += `Nome: ${nomeCliente}%0A`;
+
+      const recebimento = document.getElementById('recebimento').value;
+      mensagem += `Forma de recebimento: ${recebimento}%0A`;
+
+      if (recebimento === 'entrega') {
+        const endereco = document.getElementById('endereco').value;
+        if (!endereco) {
+          alert("Por favor, informe o endereço para entrega.");
+          return;
+        }
+        mensagem += `Endereço: ${endereco}%0A`;
+      }
+
+      mensagem += `Total: R$ ${total.toFixed(2).replace('.', ',')}`;
+
+      // Confirma a mensagem antes de enviar
+      const mensagemLimpa = decodeURIComponent(mensagem).replace(/%0A/g, '\n');
+      if (!confirm(`Confirme seu pedido:\n\n${mensagemLimpa}`)) return;
+
+      // Redireciona para o WhatsApp
+      const telefone = "5581991140925";
+      const linkWhatsApp = `https://wa.me/${telefone}?text=${mensagem}`;
+      window.location.href = linkWhatsApp;
+    }
+  </script>
+</body>
+</html>
